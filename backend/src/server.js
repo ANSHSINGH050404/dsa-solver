@@ -28,16 +28,25 @@ app.get("/health", (req, res) => {
 });
 
 // make our app ready for deployment
+const isVercel = process.env.VERCEL === "1";
 
-const startServer = async () => {
-  try {
-    await connectDB();
-    app.listen(ENV.PORT, () =>
-      console.log("Server is running on port:", ENV.PORT),
-    );
-  } catch (error) {
-    console.error("💥 Error starting the server", error);
-  }
-};
+if (!isVercel) {
+  const startServer = async () => {
+    try {
+      await connectDB();
+      app.listen(ENV.PORT || 3000, () =>
+        console.log("Server is running on port:", ENV.PORT || 3000),
+      );
+    } catch (error) {
+      console.error("💥 Error starting the server", error);
+    }
+  };
 
-startServer();
+  startServer();
+} else {
+  // On Vercel, we just need to ensure DB is connected.
+  // Mongoose connection can be initiated here or inside routes.
+  connectDB();
+}
+
+export default app;
